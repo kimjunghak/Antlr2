@@ -7,86 +7,143 @@ public class MiniCPrintListener extends MiniCBaseListener {
 
     ParseTreeProperty<String> newTexts = new ParseTreeProperty<>();
 
-    boolean isBinaryOperation(MiniCParser.ExprContext ctx){
+    private boolean isBinaryOperation(MiniCParser.ExprContext ctx){
         return ctx.getChildCount() == 3 && ctx.getChild(1) != ctx.expr();
     }
 
-    boolean isUnaryOperation(MiniCParser.ExprContext ctx){
+    private boolean isUnaryOperation(MiniCParser.ExprContext ctx){
         return ctx.getChildCount() == 2 & ctx.getChild(0) != ctx.expr();
     }
 
-    boolean isTypeOnly(MiniCParser.Local_declContext ctx){
+    private boolean isTypeOnly(MiniCParser.Local_declContext ctx){
         return ctx.getChildCount() == 3;
     }
 
-    boolean isTypeArray(MiniCParser.Local_declContext ctx){
+    private boolean isTypeArray(MiniCParser.Local_declContext ctx){
         return ctx.getChildCount() == 6;
     }
 
-    boolean isTypeAssign(MiniCParser.Local_declContext ctx){
+    private boolean isTypeAssign(MiniCParser.Local_declContext ctx){
         return ctx.getChildCount() == 5;
     }
 
-    boolean isVarTypeOnly(MiniCParser.Var_declContext ctx){
+    private boolean isVarTypeOnly(MiniCParser.Var_declContext ctx){
         return ctx.getChildCount() == 3;
     }
 
-    boolean isVarTypeArray(MiniCParser.Var_declContext ctx){
+    private boolean isVarTypeArray(MiniCParser.Var_declContext ctx){
         return ctx.getChildCount() == 6;
     }
 
-    boolean isVarTypeAssign(MiniCParser.Var_declContext ctx){
+    private boolean isVarTypeAssign(MiniCParser.Var_declContext ctx){
         return ctx.getChildCount() == 5;
     }
 
-    boolean isExpr_stmt(MiniCParser.StmtContext ctx){
+    private boolean isExpr_stmt(MiniCParser.StmtContext ctx){
         return ctx.getChild(0) == ctx.expr_stmt();
     }
 
-    boolean isCompound_stmt(MiniCParser.StmtContext ctx){
+    private boolean isCompound_stmt(MiniCParser.StmtContext ctx){
         return ctx.getChild(0) == ctx.compound_stmt();
     }
 
-    boolean isIf_stmt(MiniCParser.StmtContext ctx){
+    private boolean isIf_stmt(MiniCParser.StmtContext ctx){
         return ctx.getChild(0) == ctx.if_stmt();
     }
 
-    boolean isWhile_stmt(MiniCParser.StmtContext ctx){
+    private boolean isWhile_stmt(MiniCParser.StmtContext ctx){
         return ctx.getChild(0) == ctx.while_stmt();
     }
 
-    boolean isReturn_stmt(MiniCParser.StmtContext ctx){
+    private boolean isReturn_stmt(MiniCParser.StmtContext ctx){
         return ctx.getChild(0) == ctx.return_stmt();
     }
 
-    boolean isNoBraket(MiniCParser.ParamContext ctx){
+    private boolean isNoBraket(MiniCParser.ParamContext ctx){
         return ctx.getChildCount() == 2;
     }
 
-    boolean isBraket(MiniCParser.ParamContext ctx){
+    private boolean isBraket(MiniCParser.ParamContext ctx){
         return ctx.getChildCount() == 4;
     }
 
-    boolean isVoid(MiniCParser.ParamsContext ctx){
+    private boolean isVoid(MiniCParser.ParamsContext ctx){
         return ctx.getChildCount() == 1;
     }
 
-    boolean isNohting(MiniCParser.ParamsContext ctx){
+    private boolean isNohting(MiniCParser.ParamsContext ctx){
         return ctx.getChildCount() == 0;
     }
 
-    boolean isVarDecl(MiniCParser.DeclContext ctx){
+    private boolean isVarDecl(MiniCParser.DeclContext ctx){
         return ctx.getChild(0) == ctx.var_decl();
     }
 
-    boolean isFunDecl(MiniCParser.DeclContext ctx){
+    private boolean isFunDecl(MiniCParser.DeclContext ctx){
         return ctx.getChild(0) == ctx.fun_decl();
     }
 
-    boolean isArgsNohting(MiniCParser.ArgsContext ctx){
+    private boolean isArgsNohting(MiniCParser.ArgsContext ctx){
         return ctx.getChildCount() == 0;
     }
 
+    private boolean isArrayExpr(MiniCParser.ExprContext ctx) {
+        return ctx.getChildCount() == 6 && ctx.getChild(2) == ctx.expr();
+    }
+
+    private boolean isIdAssign(MiniCParser.ExprContext ctx) {
+        return ctx.getChildCount() == 3 && ctx.getChild(2) == ctx.expr();
+    }
+
+    private boolean isIdArgs(MiniCParser.ExprContext ctx) {
+        return ctx.getChildCount() == 4 && ctx.getChild(2) == ctx.args();
+    }
+
+    private boolean isIdExpr(MiniCParser.ExprContext ctx) {
+        return ctx.getChildCount() == 4 && ctx.getChild(2) == ctx.expr();
+    }
+
+    private boolean isExpr(MiniCParser.ExprContext ctx) {
+        return ctx.getChildCount() == 3 && ctx.getChild(1) == ctx.expr();
+    }
+
+    private boolean isIdent(MiniCParser.ExprContext ctx) {
+        return ctx.getChild(0) == ctx.IDENT();
+    }
+
+    private boolean isLiteral(MiniCParser.ExprContext ctx) {
+        return ctx.getChild(0) == ctx.LITERAL();
+    }
+
+    private String opSelect(MiniCParser.ExprContext ctx, String op) {
+        switch(op){
+            case "EQ":
+                op = newTexts.get(ctx.EQ());
+                break;
+            case "NE":
+                op = newTexts.get(ctx.NE());
+                break;
+            case "LE":
+                op = newTexts.get(ctx.LE());
+                break;
+            case "GE":
+                op = newTexts.get(ctx.GE());
+                break;
+            case "AND":
+                op = newTexts.get(ctx.AND());
+                break;
+            case "OR":
+                op = newTexts.get(ctx.OR());
+                break;
+            default:
+                break;
+        }
+        return op;
+    }
+
+    private boolean isElse(MiniCParser.If_stmtContext ctx) {
+        return ctx.getChildCount() == 7 && ctx.getChild(5) == ctx.ELSE();
+    }
 
     @Override
     public void exitProgram(MiniCParser.ProgramContext ctx) {
@@ -113,9 +170,9 @@ public class MiniCPrintListener extends MiniCBaseListener {
 
         if(isVarTypeAssign(ctx)) {
             type = newTexts.get(ctx.type_spec());
-            id = ctx.getChild(1).getText();
+            id = newTexts.get(ctx.IDENT());
             assign = ctx.getChild(2).getText();
-            lit = ctx.getChild(3).getText();
+            lit = newTexts.get(ctx.LITERAL());
             semicolon = ctx.getChild(4).getText();
 
             newTexts.put(ctx, type + " "+ id + " " + assign + " " + lit + semicolon + "\n");
@@ -124,9 +181,9 @@ public class MiniCPrintListener extends MiniCBaseListener {
 
         else if(isVarTypeArray(ctx)){
             type = newTexts.get(ctx.type_spec());
-            id = ctx.getChild(1).getText();
+            id = newTexts.get(ctx.IDENT());
             leftSquareBracket = ctx.getChild(2).getText();
-            lit = ctx.getChild(3).getText();
+            lit = newTexts.get(ctx.LITERAL());
             rightSquareBracket = ctx.getChild(4).getText();
             semicolon = ctx.getChild(5).getText();
 
@@ -135,9 +192,10 @@ public class MiniCPrintListener extends MiniCBaseListener {
 
         else if(isVarTypeOnly(ctx)){
             type = newTexts.get(ctx.type_spec());
-            id = ctx.getChild(0).getText();
+            id = newTexts.get(ctx.IDENT());
+            semicolon = ctx.getChild(2).getText();
 
-            newTexts.put(ctx, type + " " + id);
+            newTexts.put(ctx, type + " " + id + semicolon + "\n");
         }
 
     }
@@ -145,12 +203,24 @@ public class MiniCPrintListener extends MiniCBaseListener {
 
     @Override
     public void exitType_spec(MiniCParser.Type_specContext ctx) {
-        String type;
+        String type = null;
 
-        type = ctx.getChild(0).getText();
+        if(isTypeVOID(ctx))
+            type = newTexts.get(ctx.VOID());
+
+        else if(isTypeINT(ctx))
+            type = newTexts.get(ctx.INT());
 
         newTexts.put(ctx, type);
 
+    }
+
+    private boolean isTypeINT(MiniCParser.Type_specContext ctx) {
+        return ctx.getChild(0) == ctx.INT();
+    }
+
+    private boolean isTypeVOID(MiniCParser.Type_specContext ctx) {
+        return ctx.getChild(0) == ctx.VOID();
     }
 
     @Override
@@ -158,7 +228,7 @@ public class MiniCPrintListener extends MiniCBaseListener {
         String type, id, leftParen, rightParen, params, compund_stmt;
 
         type = newTexts.get(ctx.type_spec());
-        id = ctx.getChild(1).getText();
+        id = newTexts.get(ctx.IDENT());
         leftParen = ctx.getChild(2).getText();
         params = newTexts.get(ctx.params());
         rightParen = ctx.getChild(4).getText();
@@ -172,7 +242,7 @@ public class MiniCPrintListener extends MiniCBaseListener {
         String param1, param2, comma, void_stmt;
 
         if(isVoid(ctx)){
-            void_stmt = ctx.getChild(0).getText();
+            void_stmt = newTexts.get(ctx.VOID());
 
             newTexts.put(ctx, void_stmt);
         }
@@ -196,14 +266,14 @@ public class MiniCPrintListener extends MiniCBaseListener {
 
         if(isNoBraket(ctx)){
             type = newTexts.get(ctx.type_spec());
-            id = ctx.getChild(1).getText();
+            id = newTexts.get(ctx.IDENT());
 
             newTexts.put(ctx, type + " " + id);
         }
 
         else if(isBraket(ctx)){
             type = newTexts.get(ctx.type_spec());
-            id = ctx.getChild(1).getText();
+            id = newTexts.get(ctx.IDENT());
             leftSquareBracket = ctx.getChild(2).getText();
             rightSquareBracket = ctx.getChild(3).getText();
 
@@ -213,37 +283,24 @@ public class MiniCPrintListener extends MiniCBaseListener {
 
     @Override
     public void exitStmt(MiniCParser.StmtContext ctx) {
-        String stmt;
+        String stmt = null;
 
-        if(isExpr_stmt(ctx)){
+        if(isExpr_stmt(ctx))
             stmt = newTexts.get(ctx.expr_stmt());
 
-            newTexts.put(ctx, stmt);
-        }
-
-        else if(isCompound_stmt(ctx)){
+        else if(isCompound_stmt(ctx))
             stmt = newTexts.get(ctx.compound_stmt());
 
-            newTexts.put(ctx, stmt);
-        }
-
-        else if(isIf_stmt(ctx)){
+        else if(isIf_stmt(ctx))
             stmt = newTexts.get(ctx.if_stmt());
 
-            newTexts.put(ctx, stmt);
-        }
-
-        else if(isWhile_stmt(ctx)){
+        else if(isWhile_stmt(ctx))
             stmt = newTexts.get(ctx.while_stmt());
 
-            newTexts.put(ctx, stmt);
-        }
-
-        else if(isReturn_stmt(ctx)){
+        else if(isReturn_stmt(ctx))
             stmt = newTexts.get(ctx.return_stmt());
 
-            newTexts.put(ctx, stmt);
-        }
+        newTexts.put(ctx, stmt);
     }
 
     @Override
@@ -253,14 +310,14 @@ public class MiniCPrintListener extends MiniCBaseListener {
         expr = newTexts.get(ctx.expr());
         semicolon = ctx.getChild(1).getText();
 
-        newTexts.put(ctx, expr + semicolon);
+        newTexts.put(ctx, expr + semicolon + "\n");
     }
 
     @Override
     public void exitWhile_stmt(MiniCParser.While_stmtContext ctx) {
         String while_stmt, leftParen, rightParen, expr, stmt;
 
-        while_stmt = ctx.getChild(0).getText();
+        while_stmt = newTexts.get(ctx.WHILE());
         leftParen = ctx.getChild(1).getText();
         expr = newTexts.get(ctx.expr());
         rightParen = ctx.getChild(3).getText();
@@ -287,9 +344,9 @@ public class MiniCPrintListener extends MiniCBaseListener {
 
         if(isTypeAssign(ctx)) {
             type = newTexts.get(ctx.type_spec());
-            id = ctx.getChild(1).getText();
+            id = newTexts.get(ctx.IDENT());
             assign = ctx.getChild(2).getText();
-            lit = ctx.getChild(3).getText();
+            lit = newTexts.get(ctx.LITERAL());
             semicolon = ctx.getChild(4).getText();
 
             newTexts.put(ctx, type + " "+ id + " " + assign + " " + lit + semicolon + "\n");
@@ -298,9 +355,9 @@ public class MiniCPrintListener extends MiniCBaseListener {
 
         else if(isTypeArray(ctx)){
             type = newTexts.get(ctx.type_spec());
-            id = ctx.getChild(1).getText();
+            id = newTexts.get(ctx.IDENT());
             leftSquareBracket = ctx.getChild(2).getText();
-            lit = ctx.getChild(3).getText();
+            lit = newTexts.get(ctx.LITERAL());
             rightSquareBracket = ctx.getChild(4).getText();
             semicolon = ctx.getChild(5).getText();
 
@@ -309,75 +366,153 @@ public class MiniCPrintListener extends MiniCBaseListener {
 
         else if(isTypeOnly(ctx)){
             type = newTexts.get(ctx.type_spec());
-            id = ctx.getChild(0).getText();
+            id = newTexts.get(ctx.IDENT());
+            semicolon = ctx.getChild(2).getText();
 
-            newTexts.put(ctx, type + " " + id);
+            newTexts.put(ctx, type + " " + id + semicolon + "\n");
         }
 
     }
 
     @Override
     public void exitIf_stmt(MiniCParser.If_stmtContext ctx) {
-        String if_stmt, paren1, paren2, expr, stmt;
+        String if_stmt, leftParen, rightParen, expr, stmt1, else_stmt, stmt2;
 
-        if_stmt = ctx.getChild(0).getText();
-        expr = newTexts.get(ctx.expr());
-        paren1 = ctx.getChild(1).getText();
-        paren2 = ctx.getChild(3).getText();
-        stmt = newTexts.get(ctx.stmt(0));
+        if(isElse(ctx)){
+            if_stmt = newTexts.get(ctx.IF());
+            leftParen = ctx.getChild(1).getText();
+            expr = newTexts.get(ctx.expr());
+            rightParen = ctx.getChild(3).getText();
+            stmt1 = newTexts.get(ctx.stmt(0));
+            else_stmt = newTexts.get(ctx.ELSE());
+            stmt2 = newTexts.get(ctx.stmt(1));
 
-        newTexts.put(ctx, if_stmt + paren1 + expr + paren2 + stmt);
+            newTexts.put(ctx, if_stmt + leftParen + expr + rightParen + stmt1 + else_stmt + stmt2);
+        }
+
+        else if(ctx.getChildCount() == 4){
+            if_stmt = newTexts.get(ctx.IF());
+            leftParen = ctx.getChild(1).getText();
+            expr = newTexts.get(ctx.expr());
+            rightParen = ctx.getChild(3).getText();
+            stmt1 = newTexts.get(ctx.stmt(0));
+
+            newTexts.put(ctx, if_stmt + leftParen + expr + rightParen + stmt1);
+        }
+
 
     }
 
+
     @Override
     public void exitReturn_stmt(MiniCParser.Return_stmtContext ctx) {
-        String ret, s1;
+        String ret, expr, semicolon;
 
-        ret = ctx.getChild(0).getText();
-        s1 = newTexts.get(ctx.expr());
-        newTexts.put(ctx, ret + " " + s1);
+        if(ctx.getChildCount() == 3) {
+            ret = newTexts.get(ctx.RETURN());
+            expr = newTexts.get(ctx.expr());
+            semicolon = ctx.getChild(2).getText();
+            newTexts.put(ctx, ret + " " + expr + semicolon + "\n");
+        }
+        else if(ctx.getChildCount() == 2){
+            ret = newTexts.get(ctx.RETURN());
+            semicolon = ctx.getChild(1).getText();
+
+            newTexts.put(ctx, ret + semicolon + "\n");
+        }
 
     }
 
     @Override
     public void exitExpr(MiniCParser.ExprContext ctx){
-        String s1, s2, op;
+        String expr1, expr2, op, leftParen, rightParen, args, id, assign;
 
-        if(isBinaryOperation(ctx)) {
+        if(isLiteral(ctx)){
+            expr1 = newTexts.get(ctx.LITERAL());
+            newTexts.put(ctx, expr1);
+        }
 
-            s1 = newTexts.get(ctx.expr(0));
-            s2 = newTexts.get(ctx.expr(1));
-            op = ctx.getChild(1).getText();
-            newTexts.put(ctx, s1 + " " + op + " " + s2);
+        else if(isIdent(ctx)){
+            expr1 = newTexts.get(ctx.IDENT());
+            newTexts.put(ctx, expr1);
+        }
 
+        else if(isExpr(ctx)){
+            leftParen = ctx.getChild(0).getText();
+            rightParen = ctx.getChild(2).getText();
+            expr1 = newTexts.get(ctx.expr(0));
+
+            newTexts.put(ctx, leftParen + expr1 + rightParen);
+        }
+
+        else if(isIdExpr(ctx)){
+            id = newTexts.get(ctx.IDENT());
+            leftParen = ctx.getChild(1).getText();
+            rightParen = ctx.getChild(3).getText();
+            expr1 = newTexts.get(ctx.expr(0));
+
+            newTexts.put(ctx, id + leftParen + expr1 + rightParen);
+        }
+
+        else if(isIdArgs(ctx)){
+            id = newTexts.get(ctx.IDENT());
+            leftParen = ctx.getChild(1).getText();
+            rightParen = ctx.getChild(3).getText();
+            args = newTexts.get(ctx.args());
+
+            newTexts.put(ctx, id + leftParen + args + rightParen);
         }
 
         else if(isUnaryOperation(ctx)){
             op = ctx.getChild(0).getText();
-            s1 = newTexts.get(ctx.expr(0));
-            newTexts.put(ctx, op + s1);
+            expr1 = newTexts.get(ctx.expr(0));
+            newTexts.put(ctx, op + expr1);
 
+        }
+
+        else if(isBinaryOperation(ctx)) {
+
+            expr1 = newTexts.get(ctx.expr(0));
+            expr2 = newTexts.get(ctx.expr(1));
+            op = ctx.getChild(1).getText();
+            op = opSelect(ctx, op);
+            newTexts.put(ctx, expr1 + " " + op + " " + expr2);
+
+        }
+
+        else if(isIdAssign(ctx)){
+            id = newTexts.get(ctx.IDENT());
+            assign = ctx.getChild(1).getText();
+            expr1 = newTexts.get(ctx.expr(0));
+
+            newTexts.put(ctx, id + " " + assign + " " + expr1);
+        }
+
+        else if(isArrayExpr(ctx)){
+            id = newTexts.get(ctx.IDENT());
+            leftParen = ctx.getChild(1).getText();
+            rightParen = ctx.getChild(3).getText();
+            expr1 = newTexts.get(ctx.expr(0));
+            assign = ctx.getChild(4).getText();
+            expr2 = newTexts.get(ctx.expr(1));
+
+            newTexts.put(ctx, id + leftParen + expr1 + rightParen + " " + assign + " " + expr2);
         }
 
     }
 
+
     @Override
     public void exitArgs(MiniCParser.ArgsContext ctx) {
-        String expr1, expr2, comma;
+        String expr;
 
         if(isArgsNohting(ctx)){
             newTexts.put(ctx, "");
         }
-
         else{
-            expr1 = newTexts.get(ctx.expr(0));
-            comma = ctx.getChild(1).getText();
-            expr2 = newTexts.get(ctx.expr(1));
-
-            newTexts.put(ctx, expr1 + comma + " " + expr2);
+            expr = newTexts.get(ctx.expr(0));
+            newTexts.put(ctx, expr);
         }
-
     }
 
 }
