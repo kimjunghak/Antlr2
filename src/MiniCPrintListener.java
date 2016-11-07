@@ -33,7 +33,7 @@ public class MiniCPrintListener extends MiniCBaseListener {
     @Override
     public void exitProgram(MiniCParser.ProgramContext ctx) {
        for(int i=0 ; i<ctx.decl().size() ; i++)
-           System.out.print(newTexts.get(ctx.decl(i)));
+           System.out.println(newTexts.get(ctx.decl(i)));
     }
 
     @Override
@@ -52,15 +52,15 @@ public class MiniCPrintListener extends MiniCBaseListener {
         id = ctx.getChild(1).getText();
 
         if(ctx.getChildCount() == 3){
-            newTexts.put(ctx, type + " " + id + "");
+            newTexts.put(ctx, type + " " + id + ";");
         }
 
         String lit = ctx.getChild(3).getText();
 
         if(ctx.getChildCount() == 5)
-            newTexts.put(ctx, type + " " + id + " = " + lit + "");
+            newTexts.put(ctx, type + " " + id + " = " + lit + ";");
         else
-            newTexts.put(ctx, type + " " + id + "[" + lit + "];\n");
+            newTexts.put(ctx, type + " " + id + "[" + lit + "];");
     }
 
     @Override
@@ -143,10 +143,10 @@ public class MiniCPrintListener extends MiniCBaseListener {
         String str = "";
 
         for(int i=0 ; i<ctx.local_decl().size() ; i++)
-            str += newTexts.get(ctx.local_decl(i)) + "\n";
+            str += "...." + newTexts.get(ctx.local_decl(i)) + "\n";
 
         for(int i=0 ; i<ctx.stmt().size() ; i++)
-            str += newTexts.get(ctx.stmt(i)) + "\n";
+            str += "...." + newTexts.get(ctx.stmt(i)) + "\n";
 
         newTexts.put(ctx, "\n{\n" + str + "}");
     }
