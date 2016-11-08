@@ -1,5 +1,7 @@
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
+import java.util.StringTokenizer;
+
 /**
  * Created by KJH on 2016-11-05.
  */
@@ -7,8 +9,19 @@ public class MiniCPrintListener extends MiniCBaseListener {
 
     ParseTreeProperty<String> newTexts = new ParseTreeProperty<>();
 
+    int indent = 0;
+
     private boolean isBinaryOperation(MiniCParser.ExprContext ctx){
         return ctx.getChildCount() == 3 && ctx.getChild(1) != ctx.expr();
+    }
+
+    private String indent(){
+        String str_indent = "";
+
+        for(int i=0 ; i<this.indent ; i++)
+            str_indent += "....";
+
+        return str_indent;
     }
 
     private String select_stmt(MiniCParser.StmtContext ctx, String stmt) {
@@ -32,8 +45,32 @@ public class MiniCPrintListener extends MiniCBaseListener {
 
     @Override
     public void exitProgram(MiniCParser.ProgramContext ctx) {
-       for(int i=0 ; i<ctx.decl().size() ; i++)
-           System.out.println(newTexts.get(ctx.decl(i)));
+        String str = "";
+        for(int i=0 ; i<ctx.decl().size() ; i++)
+            str += newTexts.get(ctx.decl(i)) + "\n";
+
+        StringTokenizer strToken = new StringTokenizer(str, "\n");
+        String result = "";
+        while(strToken.hasMoreTokens()){
+            String token = strToken.nextToken();
+
+            if(token.equals("."))
+                result += "\n";
+
+            else {
+                if (token.equals("{")) {
+                    result += indent() + token + "\n";
+                    indent++;
+                } else if (token.equals("}")) {
+                    indent--;
+                    result += indent() + token + "\n";
+                } else {
+                    result += indent() + token + "\n";
+                }
+            }
+        }
+
+        System.out.println(result);
     }
 
     @Override
@@ -48,6 +85,7 @@ public class MiniCPrintListener extends MiniCBaseListener {
     @Override
     public void exitVar_decl(MiniCParser.Var_declContext ctx) {
         String type, id;
+
         type = newTexts.get(ctx.type_spec());
         id = ctx.getChild(1).getText();
 
@@ -76,7 +114,7 @@ public class MiniCPrintListener extends MiniCBaseListener {
         compound = newTexts.get(ctx.compound_stmt());
         id = ctx.getChild(1).getText();
 
-        newTexts.put(ctx, type + " " + id + "(" + parmas + ")" + compound);
+        newTexts.put(ctx, type + " " + id + "(" + parmas + ")\n" + compound);
     }
 
     @Override
@@ -92,7 +130,7 @@ public class MiniCPrintListener extends MiniCBaseListener {
         else {
             param = newTexts.get(ctx.param(0));
             for (int i = 1; i < ctx.param().size(); i++)
-                param = ", " + newTexts.get(ctx.param(i));
+                param += ", " + newTexts.get(ctx.param(i));
 
             newTexts.put(ctx, param);
         }
@@ -134,8 +172,11 @@ public class MiniCPrintListener extends MiniCBaseListener {
         while_stmt = ctx.getChild(0).getText();
         expr = newTexts.get(ctx.expr());
         stmt = newTexts.get(ctx.stmt());
+        if(newTexts.get(ctx.stmt().compound_stmt()) == null){
+            stmt = "{\n" + stmt + "\n}";
+        }
 
-        newTexts.put(ctx, while_stmt + " (" + expr + ")" + stmt);
+        newTexts.put(ctx, while_stmt + " (" + expr + ")\n" + stmt);
     }
 
     @Override
@@ -143,12 +184,17 @@ public class MiniCPrintListener extends MiniCBaseListener {
         String str = "";
 
         for(int i=0 ; i<ctx.local_decl().size() ; i++)
-            str += "...." + newTexts.get(ctx.local_decl(i)) + "\n";
+            str += newTexts.get(ctx.local_decl(i)) + "\n";
+
+        if(ctx.local_decl().size() != 0){
+            str += ".\n";
+        }
 
         for(int i=0 ; i<ctx.stmt().size() ; i++)
-            str += "...." + newTexts.get(ctx.stmt(i)) + "\n";
+            str += newTexts.get(ctx.stmt(i)) + "\n";
 
-        newTexts.put(ctx, "\n{\n" + str + "}");
+
+        newTexts.put(ctx, "{\n" + str + "}");
     }
 
     @Override
@@ -179,13 +225,17 @@ public class MiniCPrintListener extends MiniCBaseListener {
         expr = newTexts.get(ctx.expr());
         stmt1 = newTexts.get(ctx.stmt(0));
 
+        if(newTexts.get(ctx.stmt(0).compound_stmt()) == null){
+            stmt1 = "{\n" + stmt1 + "\n}";
+        }
+
         if(ctx.getChildCount() == 5)
-            newTexts.put(ctx, if_stmt + " (" + expr + ") " + stmt1);
+            newTexts.put(ctx, if_stmt + " (" + expr + ")\n" + stmt1);
 
         else{
             else_stmt = ctx.getChild(5).getText();
             stmt2 = newTexts.get(ctx.stmt(1));
-            newTexts.put(ctx, if_stmt + " (" + expr + ") " + stmt1 +  else_stmt + stmt2);
+            newTexts.put(ctx, if_stmt + " (" + expr + ")\n" + stmt1 + "\n" + else_stmt + "\n" + stmt2);
         }
     }
 
