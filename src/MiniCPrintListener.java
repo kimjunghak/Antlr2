@@ -275,10 +275,10 @@ public class MiniCPrintListener extends MiniCBaseListener {
 
         else if(ctx.getChildCount() == 4){
             id = ctx.getChild(0).getText();
-            if(ctx.getChild(2) == ctx.expr())
+            args = newTexts.get(ctx.args());
+            if(args == null)
                 newTexts.put(ctx, id + "[" + expr1 + "]");
             else{
-                args = newTexts.get(ctx.args());
                 newTexts.put(ctx, id + "(" + args + ")" );
             }
         }
